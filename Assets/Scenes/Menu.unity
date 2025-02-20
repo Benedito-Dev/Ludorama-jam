@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textSprite: {fileID: 1237905604}
-  sceneToLoad: Inicio
+  sceneToLoad: Fase 1
   blinkDuration: 1.76
   blinkInterval: 0.1
   audioSource: {fileID: 923845056}

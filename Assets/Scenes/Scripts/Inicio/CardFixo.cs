@@ -1,77 +1,111 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CardFixo : MonoBehaviour
 {
     private Rigidbody2D rb;
-    private FixedJoint2D joint;
-    private bool isSnapped = false; // Indica se o objeto est· encaixado
+    public bool isSnapped = false; // Indica se o objeto est√° encaixado
+    public char letter; // A letra que ser√° atribu√≠da ao card fixo
 
-    public char letter;      // A letra que ser· atribuÌda ao card fixo
+    public GameObject checkSymbolPrefab; // Prefab do s√≠mbolo de check (‚úîÔ∏è)
+    public GameObject xSymbolPrefab;     // Prefab do s√≠mbolo de x (‚ùå)
+
+    private GameObject checkSymbol; // Inst√¢ncia do s√≠mbolo de check
+    private GameObject xSymbol;     // Inst√¢ncia do s√≠mbolo de x
+
+    public float yOffset = -1f; // Dist√¢ncia abaixo do CardFixo no eixo Y
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>(); // ObtÈm o Rigidbody2D do objeto fixo
+        rb = GetComponent<Rigidbody2D>(); // Obt√©m o Rigidbody2D do objeto fixo
+
+        // Configura os s√≠mbolos
+        ConfigureSymbols();
+    }
+
+    void ConfigureSymbols()
+    {
+        // Instancia os s√≠mbolos como filhos do CardFixo
+        checkSymbol = Instantiate(checkSymbolPrefab, transform);
+        xSymbol = Instantiate(xSymbolPrefab, transform);
+
+        // Ajusta a posi√ß√£o dos s√≠mbolos
+        AdjustSymbolPosition(checkSymbol);
+        AdjustSymbolPosition(xSymbol);
+
+        // Oculta ambos os s√≠mbolos no in√≠cio
+        checkSymbol.SetActive(false);
+        xSymbol.SetActive(false);
+    }
+
+    void AdjustSymbolPosition(GameObject symbol)
+    {
+        if (symbol != null)
+        {
+            // Mant√©m o mesmo eixo X e ajusta o eixo Y
+            Vector3 newPosition = transform.position;
+            newPosition.y += yOffset; // Aplica o deslocamento no eixo Y
+            symbol.transform.position = newPosition;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Verifica se o card que entra na zona de snap È um card mÛvel e se ele pode ser encaixado
+        // Verifica se o card que entra na zona de snap √© um card m√≥vel e se ele pode ser encaixado
         if (other.CompareTag("Card") && !isSnapped)
         {
-            Card card = other.GetComponent<Card>(); // Acessa o script do card mÛvel
+            Card card = other.GetComponent<Card>(); // Acessa o script do card m√≥vel
 
-            if (card != null)
+            if (card != null && !card.isSnapped)
             {
-                // Verifica se as letras coincidem, considerando mai˙sculas/min˙sculas
-                Debug.Log($"Letras comparadas: {card.letter} vs {letter}");
+                // Verifica se as letras coincidem, considerando mai√∫sculas/min√∫sculas
                 if (char.ToLower(card.letter) == char.ToLower(letter))
                 {
-                    Debug.Log("Correto");
-                   // SnapCard(other.gameObject); // Conecta o card mÛvel ao card fixo
+                    SnapCard(card); // Passa o componente Card do card m√≥vel como argumento
                 }
                 else
                 {
-                    Debug.Log("As letras n„o coincidem. N„o È possÌvel encaixar.");
+                    SnapCard(card); // Encaixa mesmo se a letra estiver incorreta
                 }
             }
         }
     }
 
-    void SnapCard(GameObject card)
+    void SnapCard(Card card)
     {
-        joint = card.AddComponent<FixedJoint2D>(); // Adiciona o FixedJoint2D no card
-        joint.connectedBody = rb; // Conecta o card fixo ao card mÛvel
-        joint.autoConfigureConnectedAnchor = false;
-        joint.anchor = Vector2.zero;
-        joint.connectedAnchor = Vector2.zero;
-
+        card.SnapTo(rb); // Usa o m√©todo do card m√≥vel para encaixar
         isSnapped = true; // Marca o card fixo como encaixado
-        Debug.Log("Card encaixado: " + card.name);
+
+        // Mostra o s√≠mbolo correspondente
+        if (char.ToLower(card.letter) == char.ToLower(letter))
+        {
+            ShowSymbol(checkSymbol); // Mostra o s√≠mbolo de check (‚úîÔ∏è)
+        }
+        else
+        {
+            ShowSymbol(xSymbol); // Mostra o s√≠mbolo de x (‚ùå)
+        }
+
+        Debug.Log($"Card {card.letter} encaixado no CardFixo {letter}. isSnapped = {isSnapped}");
     }
 
-    // FunÁ„o para liberar o card somente se as letras n„o coincidirem
-    void ReleaseCard(GameObject card)
+    void ShowSymbol(GameObject symbol)
     {
-        // Caso o card j· tenha sido encaixado, verifique as letras antes de soltar
-        Card cardScript = card.GetComponent<Card>();
-        if (cardScript != null)
-        {
-            if (char.ToLower(cardScript.letter) != char.ToLower(letter))
-            {
-                Debug.Log("Letras n„o coincidem, n„o h· necessidade de soltar.");
-            }
-            else
-            {
-                FixedJoint2D jointToRemove = card.GetComponent<FixedJoint2D>();
-                if (jointToRemove != null)
-                {
-                    Destroy(jointToRemove); // Remove o FixedJoint2D do card
-                    isSnapped = false; // Permite que o card seja encaixado novamente
-                    Debug.Log("Card solto: " + card.name);
-                }
-            }
-        }
+        // Oculta ambos os s√≠mbolos antes de mostrar o correto
+        checkSymbol.SetActive(false);
+        xSymbol.SetActive(false);
+
+        // Mostra o s√≠mbolo passado como par√¢metro
+        symbol.SetActive(true);
+    }
+
+    public void ReleaseCard()
+    {
+        isSnapped = false; // Marca o card fixo como liberado
+
+        // Oculta ambos os s√≠mbolos
+        checkSymbol.SetActive(false);
+        xSymbol.SetActive(false);
     }
 }

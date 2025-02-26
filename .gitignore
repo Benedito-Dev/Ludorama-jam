@@ -21,6 +21,7 @@ UserSettings/
 *.pdb
 *.opendb
 *.VC.db
+.vs/
 
 # Unity asset database
 *.unitypackage

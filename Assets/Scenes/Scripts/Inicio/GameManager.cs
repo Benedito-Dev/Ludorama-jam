@@ -50,13 +50,7 @@ public class GameManager : MonoBehaviour
         // Ordena os cards fixos pela posição x (assumindo que estão alinhados horizontalmente)
         cardsFixos.Sort((a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
 
-        Debug.Log($"Número de cards fixos encontrados: {cardsFixos.Count}");
-
         // Log da ordem dos cards fixos para depuração
-        foreach (CardFixo cardFixo in cardsFixos)
-        {
-            Debug.Log($"CardFixo {cardFixo.letter} na posição x: {cardFixo.transform.position.x}");
-        }
     }
 
     private void HandleCardSnapped(Card card)

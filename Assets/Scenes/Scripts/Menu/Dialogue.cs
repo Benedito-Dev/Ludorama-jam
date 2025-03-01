@@ -328,7 +328,7 @@ public class Dialogue : MonoBehaviour
 
         Debug.Log("Fade-out concluído. Carregando próxima cena...");
 
-        // Carrega a próxima cena
+        // Carrega a próxima cena automaticamente
         if (!string.IsNullOrEmpty(nomeDaProximaCena))
         {
             SceneManager.LoadScene(nomeDaProximaCena); // Troca para a próxima cena
